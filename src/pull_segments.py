@@ -46,6 +46,15 @@ TARGETS = [
         },
     },
     {
+        # Costco NET SALES (merchandise) - its total-revenue tag includes membership fees,
+        # which Walmart's and Sam's Club's net sales exclude. Dimensional from FY2018
+        # (ASC 606 disaggregation); the undimensioned SalesRevenueNet tag before that.
+        "ticker": "COST", "cik": 909832, "parent": "COST",
+        "axis": "srt:ProductOrServiceAxis", "members": ["us-gaap:ProductMember"],
+        "metrics": {"net_sales": ["us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax"]},
+        "undimensioned": {"net_sales": ["us-gaap:SalesRevenueNet"]},
+    },
+    {
         "ticker": "WFM", "cik": 1018724, "parent": "AMZN",
         "axis": "srt:ProductOrServiceAxis", "members": ["amzn:PhysicalStoresMember"],
         "metrics": {
@@ -124,6 +133,22 @@ def extract_filing(cik: int, accession: str, filed: str, target: dict) -> list[d
             if hits:
                 rows += hits
                 break
+        else:
+            # no dimensional fact in this filing: fall back to the plain (pre-ASC 606) tag
+            for tag in target.get("undimensioned", {}).get(metric, []):
+                q = _qname(tag, root)
+                if q is None:
+                    continue
+                for el in root.iter(q):
+                    c = ctxs.get(el.get("contextRef"))
+                    if not c or c["dims"] or el.text is None or not c["start"]:
+                        continue
+                    days = (date.fromisoformat(c["end"]) - date.fromisoformat(c["start"])).days
+                    if not 340 <= days <= 380:
+                        continue
+                    rows.append({"ticker": target["ticker"], "cik": cik, "metric": metric, "fiscal_year": cy_label(c["start"], c["end"]),
+                                 "period_start": c["start"], "period_end": c["end"], "value": float(el.text),
+                                 "tag": tag, "axis": "", "member": "", "accession": accession, "filed": filed, "instance": name})
     return rows
 
 

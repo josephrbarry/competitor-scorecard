@@ -185,6 +185,13 @@ def load() -> dict:
             # a literal 0 here is a pre-ASC 842 comparative (no such liability existed), not a balance
             val["operating_lease"] = ol.where(ol != 0)
             tag["operating_lease"] = tag["operating_lease_total"].astype(object).where(tag["operating_lease_total"].notna(), tag.get("operating_lease_noncurrent"))
+        if t == "COST":
+            # Net-sales basis (excludes membership fees) so Costco matches Walmart / Sam's Club.
+            ns = segs[(segs.ticker == "COST") & (segs.metric == "net_sales")].set_index("fiscal_year")
+            val["total_revenue"], tag["total_revenue"], status["total_revenue"] = val["revenue"], tag["revenue"], status["revenue"]
+            val["revenue"] = ns.value.reindex(val.index)
+            tag["revenue"] = ns.tag.reindex(val.index)
+            status["revenue"] = ns.status.reindex(val.index)
         data[t] = {"val": val, "tag": tag, "status": status, "note": note, "ends": ends}
     amz = segs[(segs.ticker == "WFM") & (segs.metric == "revenue") & (segs.fiscal_year >= 2018)].set_index("fiscal_year")
     data["WFM"]["successor"] = amz
@@ -335,6 +342,8 @@ def build_raw(wb, D) -> dict:
                 extra = "Not reported at segment level under ASC 280."
             if t == "SAMS" and key == "cost_of_sales":
                 extra = "Segment cost of revenue first disclosed in the FY2024 10-K under ASU 2023-07 (three comparative years)."
+            if t == "COST" and key == "revenue":
+                extra = "NET SALES (merchandise), excluding membership fees - ProductOrServiceAxis = ProductMember from FY2018 (parsed from the XBRL instance), SalesRevenueNet before ASC 606. Total revenue is shown as a memo row. "
             if t == "WFM" and key == "cost_of_sales":
                 extra = "Whole Foods' line is 'Cost of goods sold and occupancy costs' – includes rent; gross margin not directly comparable. "
             if key == "total_equity" and t == "WMT":
@@ -389,6 +398,17 @@ def build_raw(wb, D) -> dict:
                 notes = write_row(lab + " (memo)", k, suffix, font=F_IN, indent=1)
                 put(ws, f"{L(last_col)}{r}", ("Memo item – not used in the five core ratios except where stated. " + " ".join(notes)).strip(), font=F_NOTE)
                 r += 1
+        if t == "COST":
+            notes = write_row("Total revenue incl. membership fees (memo)", "total_revenue", "TotalRevenue", font=F_IN, indent=1)
+            put(ws, f"{L(last_col)}{r}", "Costco's income-statement total ('Total revenue'). Net sales above exclude membership fees so the revenue basis matches Walmart and Sam's Club.", font=F_NOTE)
+            r += 1
+            put(ws, f"A{r}", "Membership fee revenue = total revenue - net sales (memo, formula)", font=F_N, align=Alignment(indent=1))
+            put(ws, f"B{r}", "Formula", font=F_NOTE)
+            for y in YEARS:
+                put(ws, f"{ycol[y]}{r}", f'=IFERROR({ycol[y]}{rowmap[t]["total_revenue"]}-{ycol[y]}{rowmap[t]["revenue"]},"n/a")', font=Font(name="Calibri", size=10, bold=True), fmt=FMT_M)
+            put(ws, f"{L(last_col)}{r}", "Ties to the MembershipMember disaggregated-revenue fact (FY2025: $5,323M, see Supporting facts). Carries no cost of sales; falls straight to operating income.", font=F_NOTE)
+            name(wb, "Costco_MembershipFees", f"'Raw Data'!$C${r}:${ycol[2025]}${r}")
+            r += 1
         if t == "WFM":
             put(ws, f"A{r}", "Successor: Amazon.com 'Physical stores' net sales (memo)", font=F_N, align=Alignment(indent=1))
             put(ws, f"B{r}", "RevenueFromContractWithCustomerExcludingAssessedTax [ProductOrServiceAxis = PhysicalStoresMember]", font=F_NOTE)
@@ -535,7 +555,7 @@ def build_scorecard(wb, R) -> dict:
     ws.freeze_panes = "A6"
 
     takeaways = {
-        "GM": "Level reflects business model, not execution: warehouse clubs (Costco, Sam's Club) run 11–13%, supercenters and supermarkets 22–25%. Compare each company's trend on the Trend tab, not levels across models.",
+        "GM": "Level reflects business model, not execution: warehouse clubs (Costco, Sam's Club) run 10–12% on net sales, supercenters and supermarkets 22–25%. Compare each company's trend on the Trend tab, not levels across models.",
         "OM": "Operating margin isolates cost discipline below gross profit. Costco's has risen steadily; Kroger's FY2025 figure carries $2.7B of restructuring and impairment charges.",
         "NM": "The cleanest cross-model comparison. Costco converts the thinnest gross margin into the highest net margin through membership fees and SG&A control.",
         "CR": "Grocers and clubs run near or below 1.0x by design – inventory turns faster than suppliers are paid. A ratio above 1.0x is rare in this set and is Costco's alone.",
@@ -754,7 +774,7 @@ def build_summary(wb, RAW, S):
             "BOTTOM LINE: Walmart has felt the most persistent pressure, and it is pricing and mix – gross margin gave up ground while SG&A held. Kroger's decline is the steepest in operating terms but sits below gross profit: cost growth and FY2025 one-off charges, not pricing. Costco shows no pressure at all; Sam's Club's margin is improving.",
             f'="Walmart shows the most persistent pressure among the full filers: gross margin "&{pct(R_(2016, "GM_Walmart"))}&" (FY2016) → "&{pct(R_(2022, "GM_Walmart"))}&" (FY2022 low) → "&{pct(R_(2025, "GM_Walmart"))}&" (FY2025), and operating margin "&{pct(R_(2016, "OM_Walmart"))}&" → "&{pct(R_(2025, "OM_Walmart"))}&". The driver is pricing and mix, not cost: the gross-margin give-up tracks Walmart\'s stated price investment and the shift toward lower-margin e-commerce and grocery, while the operating-margin gap to gross margin has not widened – SG&A is under control."',
             f'="Kroger\'s decline is the largest in operating terms – "&{pct(R_(2016, "OM_Kroger"))}&" in FY2016 to "&{pct(R_(2025, "OM_Kroger"))}&" in FY2025 – but the FY2025 figure includes "&{bn(kr_chg)}&" of restructuring and asset-impairment charges; excluding them, operating margin would be about "&{pct(f"({V_(2025, 'Kroger_OperatingIncome')}+{kr_chg})/{V_(2025, 'Kroger_Revenue')}")}&". Its gross margin is essentially unchanged ("&{pct(R_(2016, "GM_Kroger"))}&" → "&{pct(R_(2025, "GM_Kroger"))}&"), so the pressure is below gross profit: cost (labour, D&A) and one-off charges rather than pricing."',
-            f'="Costco shows no pressure: gross margin is flat by design ("&{pct(R_(2016, "GM_Costco"))}&" → "&{pct(R_(2025, "GM_Costco"))}&") while net margin expanded from "&{pct(R_(2016, "NM_Costco"))}&" to "&{pct(R_(2025, "NM_Costco"))}&" – membership fees ("&{bn(cost_fees)}&" in FY2025, carried in revenue with no cost of sales) and operating leverage on "&{pct(f"{V_(2025, 'Costco_Revenue')}/{V_(2016, 'Costco_Revenue')}-1")}&" cumulative revenue growth."',
+            f'="Costco shows no pressure: gross margin is flat by design ("&{pct(R_(2016, "GM_Costco"))}&" → "&{pct(R_(2025, "GM_Costco"))}&") while net margin expanded from "&{pct(R_(2016, "NM_Costco"))}&" to "&{pct(R_(2025, "NM_Costco"))}&" – membership fees ("&{bn(cost_fees)}&" in FY2025, equal to "&{pct(f"{cost_fees}/{V_(2025, 'Costco_Revenue')}")}&" of net sales, excluded from net sales here and carrying no cost of sales) and operating leverage on "&{pct(f"{V_(2025, 'Costco_Revenue')}/{V_(2016, 'Costco_Revenue')}-1")}&" cumulative revenue growth."',
             f'="Sam\'s Club is improving: segment gross margin rose from "&{pct(R_(2022, "GM_SamsClub"))}&" (FY2022) to "&{pct(R_(2025, "GM_SamsClub"))}&" (FY2025) – a mix shift toward members-only pricing and away from fuel. Whole Foods was already under pricing pressure before the Amazon deal: gross margin "&{pct(R_(2016, "GM_WholeFoods"))}&" → "&{pct(R_(2017, "GM_WholeFoods"))}&" and operating margin "&{pct(R_(2016, "OM_WholeFoods"))}&" → "&{pct(R_(2017, "OM_WholeFoods"))}&" in its last two standalone years."',
         ]),
         ("Notable trend shifts since FY2016", [
@@ -764,10 +784,10 @@ def build_summary(wb, RAW, S):
         ]),
         ("Data caveats", [
             "• Sam's Club is a reportable segment of Walmart (ASC 280), not a filer: net sales, operating income and total assets are available FY2016–FY2025; cost of revenue only from FY2022 (ASU 2023-07 comparatives); no net income, current ratio or debt is reported at segment level.",
-            "• Whole Foods Market filed its last 10-K for FY2017 (acquired by Amazon.com 2017-08-28). FY2018 onward the only public figure is Amazon's 'Physical stores' net sales, which also includes Amazon Fresh and Amazon Go. Whole Foods' cost line included occupancy costs, so its 34–35% gross margin is not like-for-like with peers.",
-            f'="• Inventory method: Walmart (U.S.), Costco (U.S.) and Kroger (~91% of inventory) use LIFO; Whole Foods used LIFO; Costco Canada / Walmart International use FIFO. Kroger discloses its LIFO reserve – "&{bn(kr_lifo)}&" at FY2025 versus "&{bn(kr_lifo16)}&" at FY2016 – so its reported inventory and cost of sales understate FIFO-basis values; Walmart stopped quantifying its reserve after FY2020. Gross margins are therefore compared as reported; a full FIFO restatement is outside this workbook\'s scope and is discussed on the Methodology tab."',
+            "• Whole Foods Market filed its last 10-K for FY2017 (acquired by Amazon.com 2017-08-28). FY2018 onward the only public figure is Amazon's 'Physical stores' net sales, which also includes Amazon Fresh and Amazon Go. Whole Foods' cost line included occupancy costs, so its ~34% gross margin is not like-for-like with peers.",
+            f'="• Inventory method: Walmart (U.S.), Costco (U.S.) and Kroger (~91% of inventory) use LIFO; Whole Foods used LIFO; Costco Canada / Walmart International use FIFO. Kroger discloses its LIFO reserve – "&{bn(kr_lifo)}&" at FY2025 versus "&{bn(kr_lifo16)}&" at FY2016 – so its reported inventory and cost of sales understate FIFO-basis values. Walmart disclosed that LIFO approximated FIFO through January 2022 and gives only sensitivity language since; Costco discloses no reserve but took a LIFO charge worth 19 bp of gross margin in FY2022. Gross margins are therefore compared as reported; a full FIFO restatement is outside this workbook\'s scope and is discussed on the Methodology tab."',
             f'="• Total equity includes noncontrolling interests (Walmart: "&{bn(wmt_nci)}&" at FY2025) while net income is the amount attributable to the parent – the standard presentation, but it slightly lowers Walmart\'s debt-to-equity relative to a parent-only basis."',
-            "• 53-week fiscal years: Costco and Kroger FY2023 contain 53 weeks, which flatters FY2023 growth and depresses FY2024 growth by roughly 2 percentage points. Fiscal years are aligned by the SEC frame convention (calendar year holding most of the period), so Walmart's 'fiscal 2026' (ended January 2026) is FY2025 here.",
+            "• 53-week fiscal years: Costco and Kroger FY2017 and FY2023 each contain 53 weeks (371 days), which flatters growth in those years and depresses it the year after by roughly 2 percentage points. Fiscal years are aligned by the SEC frame convention (calendar year holding most of the period), so Walmart's 'fiscal 2026' (ended January 2026) is FY2025 here.",
             "• Every input carries its XBRL tag, accession number and filing date on the Data Lineage tab; seven values the SEC API could not return were taken from the filing's XBRL instance or derived from two tagged facts and are shaded yellow on Raw Data.",
         ]),
     ]
@@ -830,7 +850,7 @@ def build_method(wb, counts):
         ("ACCOUNTING POLICY & COMPARABILITY", None),
         ("Revenue (ASC 606)", "Revenue = net sales per the income statement. Tag names changed at ASC 606 adoption (SalesRevenueNet / SalesRevenueGoodsNet → "
                               "RevenueFromContractWithCustomerExcludingAssessedTax), so tags are tried in a per-company priority list held in config/companies.yaml. "
-                              "Costco's reported revenue includes membership fees ($5.3B FY2025) which carry no cost of sales and lift its gross margin by roughly two points."),
+                              "Costco reports 'Total revenue' = net sales + membership fees; this workbook uses NET SALES (the ProductMember disaggregated-revenue fact, SalesRevenueNet before 2018) so Costco's basis matches Walmart's and Sam's Club's net sales, which also exclude membership income. Membership fees ($5.3B FY2025) are a memo row: they carry no cost of sales, so on a total-revenue basis Costco's gross margin would read about two points higher."),
         ("Leases (ASC 842)", "Adopted FY2019 (Costco FY2020). Operating lease liabilities are EXCLUDED from Total debt – including them would create a step-up "
                              "in FY2019 with no financing event – and shown as a memo line and in the supplementary lease-inclusive debt-to-equity. Finance/capital "
                              "leases are INCLUDED throughout because they were liabilities under ASC 840 too. Policy per company in config/debt_policy.yaml."),
@@ -841,10 +861,10 @@ def build_method(wb, counts):
         ("Inventory (LIFO vs FIFO)", "Walmart U.S. (retail method, LIFO), Sam's Club (weighted-average, LIFO), Costco U.S. (LIFO), Kroger (~91% LIFO, link-chain "
                                      "dollar-value) and Whole Foods (LIFO) all report cost of sales after a LIFO charge in inflationary years; Costco Canada and "
                                      "Walmart International are FIFO. In 2021–2023 LIFO raised reported cost of sales and depressed gross margin and inventory "
-                                     "for the LIFO filers – Kroger's reserve grew from $1.3B (FY2016) to $2.6B (FY2025). Effects: (a) gross margins for FY2021–FY2023 "
+                                     "for the LIFO filers – Kroger's reserve grew from $1.3B (FY2016) to $2.6B (FY2025) and its LIFO charge was $157M in FY2025; Costco's FY2022 LIFO charge cost 19 bp of gross margin (~$0.4B), FY2023–FY2024 were immaterial, FY2025 7 bp. Effects: (a) gross margins for FY2021–FY2023 "
                                      "are understated relative to a FIFO basis, more so for Kroger; (b) current assets and therefore the current ratio are "
-                                     "understated for LIFO filers; (c) only Kroger discloses a reserve large enough to restate – Walmart stopped quantifying "
-                                     "its reserve after FY2020 and Costco's is immaterial. Ratios are presented as reported and trends, rather than levels, "
+                                     "understated for LIFO filers; (c) only Kroger discloses a reserve balance – Walmart stated that LIFO approximated FIFO through "
+                                     "January 2022 (FY2021) and has given only sensitivity language since; Costco discloses the annual charge but no reserve balance. Ratios are presented as reported and trends, rather than levels, "
                                      "are emphasised in the findings."),
         ("Equity and net income", "Total equity includes noncontrolling interests (Walmart $6.3B FY2025); net income is the amount attributable to the parent. "
                                   "Debt-to-equity on a parent-only equity basis would be marginally higher for Walmart; no other company has material NCI."),
@@ -890,9 +910,10 @@ def build_lineage(wb, D):
         ws.column_dimensions[L(1 + i)].width = w
     ws.freeze_panes = "C5"
     labels = {k: lab for lab, k, _ in INPUT_ROWS} | {k: lab for lab, k in DEBT_ROWS} | {k: lab for lab, k, _ in MEMO_ROWS}
-    labels |= {"operating_lease_current": "Operating lease liability – current", "operating_lease_noncurrent": "Operating lease liability – non-current",
+    labels |= {"net_sales": "Revenue (net sales) - Costco", "total_revenue": "Total revenue incl. membership fees (reference)", "operating_lease_current": "Operating lease liability – current", "operating_lease_noncurrent": "Operating lease liability – non-current",
                "operating_lease_total": "Operating lease liability – total", "equity_parent_only": "Stockholders' equity – parent only (reference)"}
     facts = D["facts"][D["facts"].status.isin(["ok", "instance", "derived"])].copy()
+    facts.loc[(facts.ticker == "COST") & (facts.metric == "revenue"), "metric"] = "total_revenue"
     facts["dimension"] = ""
     segs = D["segs"].copy()
     segs["dimension"] = segs.axis + " = " + segs.member

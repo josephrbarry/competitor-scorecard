@@ -37,11 +37,23 @@ def test_walmart_fy2018_capital_leases_in_total_debt():
 
 def test_gross_margin_ties_to_pandas(wb):
     f = pd.read_csv(edgar.ROOT / "data" / "facts_long.csv")
+    segs = pd.read_csv(edgar.ROOT / "data" / "segments_long.csv")
     gm = ratio_rows(wb["Ratio Calculations"], "Gross profit margin")
     for t, name in [("WMT", "Walmart"), ("COST", "Costco"), ("KR", "Kroger")]:
         w = f[f.ticker == t].pivot(index="fiscal_year", columns="metric", values="value")
+        if t == "COST":  # net-sales basis, excluding membership fees
+            w["revenue"] = segs[(segs.ticker == "COST") & (segs.metric == "net_sales")].set_index("fiscal_year").value.reindex(w.index)
         expected = ((w.revenue - w.cost_of_sales) / w.revenue).loc[2016:2025].tolist()
         assert gm[name] == pytest.approx(expected, abs=1e-9), name
+
+
+def test_costco_revenue_basis_is_net_sales(wb):
+    """Costco revenue must exclude membership fees; total revenue - net sales must equal the tagged fee line."""
+    raw = wb["Raw Data"]
+    rows = {raw[f"A{r}"].value: r for r in range(1, raw.max_row + 1) if raw[f"A{r}"].value}
+    fees_row = next(r for k, r in rows.items() if str(k).startswith("Membership fee revenue = total revenue"))
+    assert raw.cell(row=fees_row, column=13).value == pytest.approx(5323, abs=0.5)      # FY2025, USD millions
+    assert raw.cell(row=fees_row, column=10).value == pytest.approx(4224, abs=0.5)      # FY2022 per 10-K MD&A
 
 
 def test_debt_to_equity_ties_to_policy(wb):
@@ -50,6 +62,7 @@ def test_debt_to_equity_ties_to_policy(wb):
     assert de["Walmart"][-1] == pytest.approx((6596 + 3542 + 34624 + 856 + 5905) / 105887, abs=1e-4)
     assert de["Kroger"][-1] == pytest.approx((1366 + 14509 + 436 + 1255) / 5936, abs=1e-4)
     assert de["Costco"][-1] == pytest.approx((75 + 5713 + 78 + 1401) / 29164, abs=1e-4)
+    assert de["Walmart"][2] == pytest.approx((5225 + 1876 + 43520 + 729 + 6683) / 79634, abs=1e-4)   # FY2018 capital leases (audit fix)
     assert de["Kroger"][0] == pytest.approx((2252 + 11825) / 6710, abs=1e-4)   # FY2016 combined LTD+capital lease lines
 
 
