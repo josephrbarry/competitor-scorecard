@@ -73,10 +73,15 @@ Two findings were fixed as a result (Costco revenue basis; Walmart FY2018 capita
 
 ## Build
 
+The SEC requires every EDGAR request to identify the requester
+([fair-access policy](https://www.sec.gov/os/accessing-edgar-data)). Copy `.env.example` to
+`.env` and set `SEC_USER_AGENT` to **your own** name and email; `.env` is git-ignored and is
+never committed.
+
 ```
 python -m venv .venv
 .venv\Scripts\python -m pip install -r requirements.txt
-copy .env.example .env            # SEC_USER_AGENT="Name email"
+copy .env.example .env
 .venv\Scripts\python -m src.pull_data
 .venv\Scripts\python -m src.pull_segments
 .venv\Scripts\python -m src.build_workbook
