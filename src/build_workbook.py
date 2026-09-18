@@ -260,7 +260,7 @@ def build_cover(wb):
     put(ws, "C3", "Accounting & financial analysis · SEC 10-K filings", font=Font(name="Aptos", size=8, color="9DB4D8"), align=Alignment(vertical="top", indent=1))
     ws.row_dimensions[2].height = 22
     ws.row_dimensions[3].height = 22
-    put(ws, "D3", "01   —   COVER          ·          " + REPORT_TAG, font=Font(name="Aptos", size=8, bold=True, color="9DB4D8"), align=Alignment(horizontal="right", vertical="top"))
+    put(ws, "D2", "01   —   COVER          ·          " + REPORT_TAG, font=Font(name="Aptos", size=8, bold=True, color="9DB4D8"), align=Alignment(horizontal="right", vertical="center"))
     put(ws, "C7", "Competitor Scorecard:", font=Font(name="Aptos Display", size=28, bold=True, color=NAVY))
     put(ws, "C8", "Walmart, Costco, Kroger & Sam's Club", font=Font(name="Aptos Display", size=22, bold=True, color=TEAL))
     put(ws, "C9", "with Whole Foods Market on a best-effort basis", font=Font(name="Aptos", size=13, italic=True, color=MID))
