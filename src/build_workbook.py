@@ -147,6 +147,36 @@ def header_band(ws, row, text, first_col=1, last_col=14, fill=FILL_H, font=F_H, 
     ws.row_dimensions[row].height = height
 
 
+EYEBROW = Font(name="Aptos", size=8, bold=True, color="9DB4D8")
+F_BAND_TITLE = Font(name="Aptos Display", size=22, bold=True, color="FFFFFF")
+F_BAND_RIGHT = Font(name="Aptos", size=8, color="9DB4D8")
+F_BAND_SUB = Font(name="Aptos", size=10, italic=True, color="D9E2F3")
+RULE = Border(bottom=Side(style="thick", color=TEAL))
+REPORT_TAG = "COMPETITOR SCORECARD   ·   FY2016–FY2025   ·   SEC 10-K DATA"
+
+
+def title_band(ws, number, title, subtitle, last_col, text_col=1, subtitle_in_band=False):
+    """House-style title band (rows 1-3): navy bar with eyebrow + white title, teal rule,
+    report tag on the right; subtitle in grey italics on row 3 (or inside the band)."""
+    for r in (1, 2):
+        for c in range(1, last_col + 1):
+            ws.cell(row=r, column=c).fill = FILL_H
+    for c in range(1, last_col + 1):
+        ws.cell(row=2, column=c).border = RULE
+    ws.row_dimensions[1].height = 14
+    ws.row_dimensions[2].height = 32
+    tc = L(text_col)
+    put(ws, f"{tc}1", f"{number:02d}   —   {title.upper()}", font=EYEBROW, fill=FILL_H, align=Alignment(vertical="bottom", indent=1))
+    put(ws, f"{tc}2", title, font=F_BAND_TITLE, fill=FILL_H, align=Alignment(vertical="center", indent=1), border=RULE)
+    rc = L(last_col)
+    put(ws, f"{rc}1", REPORT_TAG, font=F_BAND_RIGHT, fill=FILL_H, align=Alignment(horizontal="right", vertical="bottom", indent=1))
+    if subtitle_in_band:
+        put(ws, f"{rc}2", subtitle, font=F_BAND_SUB, fill=FILL_H, align=Alignment(horizontal="right", vertical="center", indent=1), border=RULE)
+    else:
+        ws.row_dimensions[3].height = 18
+        put(ws, f"{tc}3", subtitle, font=F_SUB, align=Alignment(vertical="center", indent=1))
+
+
 def name(wb, nm, ref):
     wb.defined_names[nm] = DefinedName(nm, attr_text=ref)
 
@@ -219,10 +249,10 @@ def build_cover(wb):
         border=Border(left=Side(style="dashed", color="FFFFFF"), right=Side(style="dashed", color="FFFFFF"),
                       top=Side(style="dashed", color="FFFFFF"), bottom=Side(style="dashed", color="FFFFFF")))
     ws.row_dimensions[2].height = 30
-    put(ws, "C3", "CONFIDENTIAL – ANALYST DELIVERABLE", font=Font(name="Calibri", size=9, bold=True, color="FFFFFF"), align=RIGHT)
-    put(ws, "B7", "Competitor Scorecard:", font=Font(name="Calibri", size=26, bold=True, color=NAVY))
-    put(ws, "B8", "Walmart, Costco, Kroger & Sam's Club", font=Font(name="Calibri", size=22, bold=True, color=TEAL))
-    put(ws, "B9", "with Whole Foods Market on a best-effort basis", font=Font(name="Calibri", size=13, italic=True, color=MID))
+    put(ws, "C3", "01   —   COVER          ·          " + REPORT_TAG, font=Font(name="Aptos", size=8, bold=True, color="9DB4D8"), align=RIGHT)
+    put(ws, "B7", "Competitor Scorecard:", font=Font(name="Aptos Display", size=28, bold=True, color=NAVY))
+    put(ws, "B8", "Walmart, Costco, Kroger & Sam's Club", font=Font(name="Aptos Display", size=22, bold=True, color=TEAL))
+    put(ws, "B9", "with Whole Foods Market on a best-effort basis", font=Font(name="Aptos", size=13, italic=True, color=MID))
     ws.merge_cells("B11:C11")
     put(ws, "B11", "Ten-year financial comparison (FY2016–FY2025) built from SEC 10-K filings: capital structure, "
                    "resilience through 2020–2023, and margin pressure — every ratio a live formula traceable to its XBRL fact.",
@@ -279,10 +309,9 @@ def build_raw(wb, D) -> dict:
     last_col = 3 + len(YEARS)
     ycol = {y: L(3 + i) for i, y in enumerate(YEARS)}
 
-    put(ws, "A1", "Raw Data — as reported in SEC 10-K filings", font=F_TITLE)
-    put(ws, "A2", "USD millions. Blue = hard-coded input from EDGAR XBRL (one citation per value on the Data Lineage tab); "
-                  "black = formula; 'n/a' = not reported – flagged, never estimated. Fiscal years labelled by SEC frame convention "
-                  "(FY2025 = Walmart fiscal 2026, Kroger 2025, Costco 2025).", font=F_SUB)
+    title_band(ws, 3, "Raw Data", "As reported in SEC 10-K filings. USD millions. Blue = hard-coded input from EDGAR XBRL (one citation per value on the "
+                                   "Data Lineage tab); black = formula; 'n/a' = not reported – flagged, never estimated. Fiscal years labelled by SEC frame "
+                                   "convention (FY2025 = Walmart fiscal 2026, Kroger 2025, Costco 2025).", last_col)
     put(ws, "A4", "Line item", font=F_H, fill=FILL_H, align=Alignment(vertical="center", indent=1))
     put(ws, "B4", "XBRL tag(s) / basis", font=F_H, fill=FILL_H, align=CENTER)
     for y in YEARS:
@@ -486,9 +515,8 @@ def build_ratios(wb) -> dict:
     ycol = {y: L(2 + i) for i, y in enumerate(RYEARS)}
     dcol1, dcol2, ncol_notes = L(2 + ncol), L(3 + ncol), L(4 + ncol)
 
-    put(ws, "A1", "Ratio Calculations — live formulas over named ranges", font=F_TITLE)
-    put(ws, "A2", "Every cell: =IFERROR( … XLOOKUP(year, Years, Company_Metric) … , \"n/a\"). Nothing is typed in. "
-                  "Δ columns are percentage-point (margins, growth) or turns (ratios) changes.", font=F_SUB)
+    title_band(ws, 4, "Ratio Calculations", "Live formulas over named ranges: every cell is =IFERROR( … XLOOKUP(year, Years, Company_Metric) … , \"n/a\"). "
+                                             "Nothing is typed in. Δ columns are percentage-point (margins, growth) or turns (ratios) changes.", 4 + ncol - 1)
     put(ws, "A4", "Company", font=F_H, fill=FILL_H, align=Alignment(vertical="center", indent=1))
     for y in RYEARS:
         put(ws, f"{ycol[y]}4", y, font=F_H, fill=FILL_H, fmt=FMT_FY, align=CENTER)
@@ -537,9 +565,8 @@ def build_scorecard(wb, R) -> dict:
     widths = {"A": 34, "B": 12, "C": 12, "D": 12, "E": 12, "F": 12, "G": 12, "H": 13, "I": 13, "J": 90}
     for k, v in widths.items():
         ws.column_dimensions[k].width = v
-    put(ws, "A1", "Scorecard — ranking by metric", font=F_TITLE)
-    put(ws, "A2", "Ranks are computed with RANK.EQ over the companies with data; colour scales run green (strongest) to red (weakest) in the "
-                  "direction that is better for each metric. Change the year to re-rank.", font=F_SUB)
+    title_band(ws, 5, "Scorecard", "Direction-aware ranks and colour scales (green = strongest) · change the year to re-rank", 10, subtitle_in_band=True)
+    ws.row_dimensions[3].height = 22
     put(ws, "A3", "Scorecard year (input)", font=F_B)
     put(ws, "B3", 2025, font=Font(name="Calibri", size=12, bold=True, color=INPUT_BLUE), fmt=FMT_FY, fill=PatternFill("solid", fgColor="FFF2CC"), border=BOX, align=CENTER)
     name(wb, "ScorecardYear", "'Scorecard'!$B$3")
@@ -621,9 +648,8 @@ def build_scorecard(wb, R) -> dict:
 def build_trend(wb, R):
     ws = wb.create_sheet("Trend")
     sheet_setup(ws, NAVY, gridlines=False)
-    put(ws, "A1", "Trend — FY2016 to FY2025", font=F_TITLE)
-    put(ws, "A2", "Shaded band = FY2020–FY2023 (COVID-19 and the inflation spike). Gaps = data not available (Sam's Club balance sheet, Whole Foods after FY2017). "
-                  "Charts read the helper block below via NA() so missing years are skipped, never plotted as zero.", font=F_SUB)
+    title_band(ws, 6, "Trend", "FY2016–FY2025. Shaded band = FY2020–FY2023 (COVID-19 and the inflation spike). Gaps = data not available (Sam's Club balance sheet, "
+                               "Whole Foods after FY2017); charts read the helper block via NA() so missing years are skipped, never plotted as zero.", 20)
     rws = R["ws"].title
     ry = R["ycol"]
     helper_top = 70
@@ -736,11 +762,10 @@ def build_summary(wb, RAW, S):
     sheet_setup(ws, NAVY, gridlines=False)
     ws.column_dimensions["A"].width = 3
     ws.column_dimensions["B"].width = 150
-    put(ws, "B1", "Executive Summary", font=F_TITLE)
-    put(ws, "B2", "Findings are stated against the three key questions. Every figure quoted below is a live formula into the Ratio Calculations and Raw Data tabs; "
-                  "cited transactions (debt issued, buybacks, charges) are on Raw Data under 'Supporting facts'.", font=F_SUB)
-    ws.row_dimensions[2].height = 30
-    ws["B2"].alignment = WRAP
+    title_band(ws, 2, "Executive Summary", "Findings are stated against the three key questions. Every figure quoted below is a live formula into the Ratio "
+                                           "Calculations and Raw Data tabs; cited transactions (debt issued, buybacks, charges) are on Raw Data under 'Supporting facts'.", 2, text_col=2)
+    ws.row_dimensions[3].height = 30
+    ws["B3"].alignment = WRAP
 
     # at-a-glance table (rows 4-10) in columns B.. we need more columns; use a small table to the right? keep in B with merged? simpler: dedicated columns C..H are hidden by width; instead use rows.
     r = 4
@@ -816,8 +841,7 @@ def build_method(wb, counts):
     sheet_setup(ws, TEAL, gridlines=False)
     ws.column_dimensions["A"].width = 30
     ws.column_dimensions["B"].width = 140
-    put(ws, "A1", "Methodology & Tools", font=F_TITLE)
-    put(ws, "A2", "How the workbook was built, what was assumed, and where accounting policy limits comparability.", font=F_SUB)
+    title_band(ws, 7, "Methodology & Tools", "How the workbook was built, what was assumed, and where accounting policy limits comparability.", 2)
     items = [
         ("DATA SOURCES", None),
         ("SEC EDGAR", "Primary source for every number. Three endpoints: (1) the XBRL companyfacts API (data.sec.gov/api/xbrl/companyfacts) for undimensioned "
@@ -900,8 +924,8 @@ def build_method(wb, counts):
 def build_lineage(wb, D):
     ws = wb.create_sheet("Data Lineage")
     sheet_setup(ws, MID)
-    put(ws, "A1", "Data Lineage — every input value with its SEC citation", font=F_TITLE)
-    put(ws, "A2", "One row per value on Raw Data. 'Restated' = the latest-filed value differs from the first-filed value; both are shown. Links open the filing index on sec.gov.", font=F_SUB)
+    title_band(ws, 8, "Data Lineage", "Every input value with its SEC citation – one row per value on Raw Data. 'Restated' = the latest-filed value differs from the "
+                                      "first-filed value; both are shown. Links open the filing index on sec.gov.", 17)
     cols = ["Company", "Line item", "Fiscal year", "Period start", "Period end", "Value (USD)", "XBRL tag / basis", "Dimension", "Accession no.", "Filed",
             "Status", "Restated", "First-filed value", "First filed", "Versions", "Note", "EDGAR link"]
     widths = [12, 30, 10, 12, 12, 18, 52, 40, 22, 11, 10, 9, 18, 11, 8, 70, 40]
