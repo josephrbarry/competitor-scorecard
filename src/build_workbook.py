@@ -606,7 +606,7 @@ def build_trend(wb, R):
                   "Charts read the helper block below via NA() so missing years are skipped, never plotted as zero.", font=F_SUB)
     rws = R["ws"].title
     ry = R["ycol"]
-    helper_top = 62
+    helper_top = 70
     put(ws, f"A{helper_top - 1}", "Chart helper block (formulas; do not edit): =IF(ISNUMBER(ratio), ratio, NA()) — one row per series, plus the shaded-window series",
         font=F_B)
     put(ws, f"A{helper_top}", "Series", font=F_H, fill=FILL_H)
@@ -616,7 +616,7 @@ def build_trend(wb, R):
     r = helper_top + 1
     charts = [("GM", "Gross profit margin", "0%"), ("NM", "Net profit margin", "0.0%"), ("OM", "Operating margin", "0.0%"),
               ("CR", "Current ratio", '0.00"x"'), ("DE", "Debt-to-equity", '0.0"x"'), ("GR", "Revenue growth YoY", "0%")]
-    anchors = ["A4", "I4", "A23", "I23", "A42", "I42"]
+    anchors = ["A4", "K4", "A25", "K25", "A46", "K46"]
     for (key, title, nf), anchor in zip(charts, anchors):
         first = r
         members = [(t, d) for t, d, _ in COMPANIES if t in R["rows"][key] and not (t == "SAMS" and key in ("NM", "CR", "DE"))]
@@ -672,12 +672,17 @@ def build_trend(wb, R):
         bar.legend.position = "b"
         bar.legend.overlay = False
         bar.plot_area.layout = Layout(manualLayout=ManualLayout(xMode="edge", yMode="edge", x=0.09, y=0.12, w=0.88, h=0.66))
-        bar.height = 9.5
-        bar.width = 17
+        bar.height = 10
+        bar.width = 16
         ws.add_chart(bar, anchor)
+    # chart grid: each chart is ~16 cm wide; columns are sized so the second column of
+    # charts (anchored at K) starts clear of the first, and rows so the next row of
+    # charts (21 rows later) starts clear of the one above.
     ws.column_dimensions["A"].width = 18
-    for i in range(len(RYEARS)):
-        ws.column_dimensions[L(2 + i)].width = 9
+    for i in range(2, 24):
+        ws.column_dimensions[L(i)].width = 9
+    for r in range(4, helper_top - 2):
+        ws.row_dimensions[r].height = 15
     return ws
 
 
