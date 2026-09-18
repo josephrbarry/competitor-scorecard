@@ -1,0 +1,37 @@
+# Total Debt policy (applied by formula in the workbook's Raw Data "Debt build" block).
+#
+# Definition: Total Debt = short-term borrowings
+#                        + current portion of long-term debt
+#                        + long-term debt (non-current)
+#                        + finance (capital) lease liabilities, current + non-current
+#
+# ASC 842 (Leases, effective FY2019 for these filers; Costco FY2020):
+#   Operating lease liabilities came onto the balance sheet for the first time.
+#   Including them in debt would create an artificial step-up in debt-to-equity
+#   in the adoption year with no change in financing, so they are EXCLUDED from
+#   Total Debt and shown as a memo line ("Operating lease liability") so the
+#   reader can see the lease-adjusted picture. Finance leases were already
+#   liabilities under ASC 840 (as capital leases) and are INCLUDED throughout,
+#   which keeps 2016-2018 comparable with 2019-2025.
+#
+# Per-company build (which extracted components feed the formula). Where a
+# filer reports debt and finance leases as one combined line, that line is
+# used and the separate finance-lease line is NOT added again.
+companies:
+  WMT:
+    components: [short_term_borrowings, ltd_current, ltd_noncurrent, finance_lease_current, finance_lease_noncurrent]
+    note: "Walmart reports short-term borrowings, LTD due within one year, LTD, and finance (pre-2019: capital) lease obligations as separate balance-sheet lines."
+  COST:
+    components: [ltd_current, ltd_noncurrent, finance_lease_current, finance_lease_noncurrent, finance_lease_total]
+    rule: "finance_lease_total is used only in years where current/non-current are not separately tagged (FY2021-FY2023); the workbook formula takes current+non-current if present, else total."
+    note: "Costco has no short-term borrowings line. Finance leases sit inside 'other current' / 'other long-term liabilities' and are disclosed in the Leases note."
+  KR:
+    components: [ltd_and_leases_current, ltd_and_leases_noncurrent, ltd_current, ltd_noncurrent, finance_lease_current, finance_lease_noncurrent]
+    rule: "FY2016-FY2018: the combined 'long-term debt including obligations under capital leases' lines are used (they tie to LTD + capital leases exactly). FY2019+: LTD lines plus finance lease lines."
+    note: "Kroger has no short-term borrowings line; commercial paper is inside current LTD."
+  WFM:
+    components: [ltd_and_leases_current, ltd_and_leases_noncurrent]
+    note: "Whole Foods reported 'long-term debt and capital lease obligations' as combined lines; FY2016-FY2017 only."
+  SAMS:
+    components: []
+    note: "Segment (ASC 280) - no balance sheet is reported for Sam's Club; debt ratios not computable."
