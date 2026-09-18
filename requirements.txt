@@ -1,0 +1,8 @@
+# Install with:  .venv\Scripts\python -m pip install -r requirements.txt
+requests==2.32.3        # HTTP calls to SEC EDGAR
+pandas==2.2.3           # tidy tables
+pyyaml==6.0.2           # config/companies.yaml
+openpyxl==3.1.5         # write the Excel workbook with live formulas and native charts
+python-dotenv==1.0.1    # read SEC_USER_AGENT from .env
+pytest==8.3.4           # tests
+pywin32==308            # recalculate the workbook in Excel via COM

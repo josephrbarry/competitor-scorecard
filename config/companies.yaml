@@ -1,0 +1,62 @@
+# Company register for Competitor_Scorecard.xlsx.
+# CIKs confirmed against the SEC ticker file / submissions endpoint.
+#
+# Fiscal-year convention: every year in the workbook is labelled by the SEC
+# "frame" rule (CY2025 = the calendar year most of the fiscal period falls in),
+# so Walmart "fiscal 2026" (FYE Jan-2026) == Kroger "2025" (FYE Jan-2026) == CY2025.
+#
+# revenue_tags / cogs_tags are tried in priority order per period because
+# companyfacts tags drift over time (ASC 606 adoption in 2018 renamed most of them).
+
+window:
+  first_frame: CY2016
+  last_frame: CY2025
+
+companies:
+  WMT:
+    name: Walmart Inc.
+    cik: 104169
+    coverage: full
+    fye_rule: "January 31"
+    inventory_method: "Walmart U.S.: retail inventory method, LIFO. Sam's Club: weighted-average cost, LIFO. International: FIFO."
+    revenue_tags: [RevenueFromContractWithCustomerExcludingAssessedTax, SalesRevenueNet, Revenues]
+    cogs_tags: [CostOfRevenue]
+
+  COST:
+    name: Costco Wholesale Corporation
+    cik: 909832
+    coverage: full
+    fye_rule: "Sunday nearest August 31"
+    inventory_method: "U.S.: LIFO. Canada: FIFO. Other International: retail method, FIFO."
+    fifty_three_week_years: [CY2023]
+    revenue_tags: [RevenueFromContractWithCustomerExcludingAssessedTax, Revenues, SalesRevenueNet]
+    cogs_tags: [CostOfGoodsAndServicesSold, CostOfGoodsSold]
+
+  KR:
+    name: The Kroger Co.
+    cik: 56873
+    coverage: full
+    fye_rule: "Saturday nearest January 31"
+    inventory_method: "~91% LIFO (dollar-value, link-chain); fuel and remainder FIFO."
+    fifty_three_week_years: [CY2023]
+    revenue_tags: [RevenueFromContractWithCustomerExcludingAssessedTax, SalesRevenueGoodsNet, Revenues]
+    cogs_tags: [CostOfGoodsAndServiceExcludingDepreciationDepletionAndAmortization, CostOfGoodsSoldExcludingDepreciationDepletionAndAmortization, CostOfGoodsSold, CostOfRevenue]
+
+  # ---- Best-effort / segment-only companies -------------------------------
+  SAMS:
+    name: "Sam's Club (Walmart segment)"
+    cik: 104169                      # reported inside Walmart's 10-K, Note on Segments
+    coverage: segment                # net sales + operating income only; no COGS, NI, or balance sheet
+    parent: WMT
+    inventory_method: "Weighted-average cost, LIFO (per Walmart 10-K)."
+
+  WFM:
+    name: Whole Foods Market, Inc.
+    cik: 865436
+    coverage: partial                # standalone 10-Ks FY2016-FY2017 only; acquired by Amazon 2017-08-28
+    fye_rule: "Last Sunday in September"
+    inventory_method: "LIFO for most inventory (~ 'lower of cost or market, LIFO')."
+    successor: AMZN
+    successor_cik: 1018724           # Amazon 'Physical stores' net sales FY2018+ (segment revenue only)
+    revenue_tags: [SalesRevenueNet, Revenues]
+    cogs_tags: [CostOfGoodsAndServicesSold, CostOfRevenue]
