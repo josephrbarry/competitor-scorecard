@@ -257,7 +257,7 @@ def build_cover(wb):
                       top=Side(style="medium", color=TEAL), bottom=Side(style="medium", color=TEAL)))
     ws["B3"].border = Border(left=Side(style="medium", color=TEAL), right=Side(style="medium", color=TEAL), bottom=Side(style="medium", color=TEAL))
     put(ws, "C2", "RYAN BARRY", font=Font(name="Aptos", size=9, bold=True, color="FFFFFF"), align=Alignment(vertical="center", indent=1))
-    put(ws, "C3", "Financial analysis · SEC filings", font=Font(name="Aptos", size=8, color="9DB4D8"), align=Alignment(vertical="top", indent=1))
+    put(ws, "C3", "Accounting & financial analysis · SEC 10-K filings", font=Font(name="Aptos", size=8, color="9DB4D8"), align=Alignment(vertical="top", indent=1))
     ws.row_dimensions[2].height = 22
     ws.row_dimensions[3].height = 22
     put(ws, "D3", "01   —   COVER          ·          " + REPORT_TAG, font=Font(name="Aptos", size=8, bold=True, color="9DB4D8"), align=Alignment(horizontal="right", vertical="top"))
