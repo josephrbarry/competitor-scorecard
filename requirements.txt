@@ -7,3 +7,4 @@ python-dotenv==1.0.1    # read SEC_USER_AGENT from .env
 pytest==8.3.4           # tests
 pywin32==308            # recalculate the workbook in Excel via COM
 lxml==5.3.0             # parse 10-K XBRL instances for dimensional (ASC 280 segment) facts
+pymupdf==1.24.10        # render PDF pages to PNG for the README (src/export_docs.py)

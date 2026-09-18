@@ -16,6 +16,22 @@ carries its XBRL tag, accession number and filing date.
 | **2. Resilience 2020–2023** – who absorbed COVID and inflation best? | **Costco** – revenue +9%/+18%/+16%, net margin up, current ratio peaked at 1.13x. **Walmart took the biggest hit** (FY2022 gross margin 23.5%, operating margin 3.4% – decade lows) but recovered within two years. Kroger's swings were fuel-mix, not stress. |
 | **3. Margin pressure** – who has felt it most; cost, pricing or mix? | **Walmart**, and it is pricing and mix: gross margin 24.9% → 24.2% while SG&A held. Kroger's operating-margin drop (3.0% → 1.3%) is cost and $2.7B of FY2025 charges, not pricing. Costco: none. |
 
+## Preview
+
+Don't want to open Excel? The reader's copy is
+[`docs/Competitor_Scorecard_summary.pdf`](docs/Competitor_Scorecard_summary.pdf) (Cover, Executive
+Summary, Scorecard, Trend – 7 pages).
+
+**Executive Summary** – one bold verdict per question, then the evidence; every number is a live formula.
+
+![Executive Summary](docs/executive_summary_p1.png)
+
+**Scorecard** – direction-aware ranks and colour scales; type any year into B3 and it re-ranks.
+
+![Scorecard](docs/scorecard.png)
+
+**Trend** – six native Excel charts with the FY2020–FY2023 shock window shaded.
+
 ![Debt-to-equity](docs/debt_to_equity.png)
 ![Gross margin](docs/gross_margin.png)
 
@@ -86,6 +102,7 @@ copy .env.example .env
 .venv\Scripts\python -m src.pull_segments
 .venv\Scripts\python -m src.build_workbook
 .venv\Scripts\python -m src.recalc_excel output\Competitor_Scorecard.xlsx
+.venv\Scripts\python -m src.export_docs      # reader PDF + README images
 .venv\Scripts\python -m pytest -q
 ```
 
@@ -94,8 +111,8 @@ copy .env.example .env
 ```
 config/    companies.yaml, debt_policy.yaml
 data/      facts_long.csv, segments_long.csv, overrides.csv, driver_facts.csv (raw/ is cached EDGAR, git-ignored)
-src/       edgar.py, pull_data.py, pull_segments.py, build_workbook.py, recalc_excel.py
+src/       edgar.py, pull_data.py, pull_segments.py, build_workbook.py, recalc_excel.py, export_docs.py, audit_raw.py, audit_instances.py
 tests/     test_data.py, test_workbook.py
 output/    Competitor_Scorecard.xlsx
-docs/      chart exports used above
+docs/      audit_report.md, Competitor_Scorecard_summary.pdf, page images used above
 ```

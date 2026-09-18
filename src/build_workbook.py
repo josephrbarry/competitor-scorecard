@@ -25,6 +25,7 @@ Then: .venv\\Scripts\\python -m src.recalc_excel output/Competitor_Scorecard.xls
 from __future__ import annotations
 
 import math
+import re
 from datetime import date
 
 import pandas as pd
@@ -169,7 +170,10 @@ def title_band(ws, number, title, subtitle, last_col, text_col=1, subtitle_in_ba
     put(ws, f"{tc}1", f"{number:02d}   —   {title.upper()}", font=EYEBROW, fill=FILL_H, align=Alignment(vertical="bottom", indent=1))
     put(ws, f"{tc}2", title, font=F_BAND_TITLE, fill=FILL_H, align=Alignment(vertical="center", indent=1), border=RULE)
     rc = L(last_col)
-    put(ws, f"{rc}1", REPORT_TAG, font=F_BAND_RIGHT, fill=FILL_H, align=Alignment(horizontal="right", vertical="bottom", indent=1))
+    if rc == tc:   # two-column tabs: eyebrow and report tag share one cell
+        put(ws, f"{tc}1", f"{number:02d}   —   {title.upper()}          ·          {REPORT_TAG}", font=EYEBROW, fill=FILL_H, align=Alignment(vertical="bottom", indent=1))
+    else:
+        put(ws, f"{rc}1", REPORT_TAG, font=F_BAND_RIGHT, fill=FILL_H, align=Alignment(horizontal="right", vertical="bottom", indent=1))
     if subtitle_in_band:
         put(ws, f"{rc}2", subtitle, font=F_BAND_SUB, fill=FILL_H, align=Alignment(horizontal="right", vertical="center", indent=1), border=RULE)
     else:
@@ -272,7 +276,7 @@ def build_cover(wb):
     for k, v in rows:
         put(ws, f"B{r}", k, font=F_B, align=Alignment(vertical="top"))
         put(ws, f"C{r}", v, font=F_N, align=Alignment(wrap_text=True, vertical="top"))
-        ws.row_dimensions[r].height = 15 * max(1, math.ceil(len(v) / 80))
+        ws.row_dimensions[r].height = 15 * max(1, math.ceil(len(v) / 95))
         r += 1
     put(ws, f"B{r + 1}", "Contents", font=F_B, border=BOTTOM)
     put(ws, f"C{r + 1}", "", border=BOTTOM)
@@ -306,8 +310,9 @@ def build_cover(wb):
     for k, v in guide:
         put(ws, f"B{r}", k, font=Font(name="Calibri", size=10, bold=True, color=TEAL), align=Alignment(vertical="top"))
         put(ws, f"C{r}", v, font=F_N, align=Alignment(wrap_text=True, vertical="top"))
-        ws.row_dimensions[r].height = 15 * max(1, math.ceil(len(v) / 80))
+        ws.row_dimensions[r].height = 15 * max(1, math.ceil(len(v) / 95))
         r += 1
+    ws.page_setup.fitToHeight = 1
     put(ws, f"B{r + 1}", "Personal portfolio project built from public filings only. Not an H-E-B work product; no non-public information used.",
         font=F_NOTE)
     ws.merge_cells(f"B{r + 1}:C{r + 1}")
@@ -741,6 +746,7 @@ def build_trend(wb, R):
     # chart grid: each chart is ~16 cm wide; columns are sized so the second column of
     # charts (anchored at K) starts clear of the first, and rows so the next row of
     # charts (21 rows later) starts clear of the one above.
+    ws.print_area = "A1:T66"
     ws.column_dimensions["A"].width = 18
     for i in range(2, 24):
         ws.column_dimensions[L(i)].width = 9
@@ -841,13 +847,16 @@ def build_summary(wb, RAW, S):
             b = b.replace('="• ', '="').replace("• ", "", 1) if b.startswith('="• ') or b.startswith("• ") else b
             if b.startswith("BOTTOM LINE:"):
                 put(ws, f"B{r}", b, font=Font(name="Calibri", size=10.5, bold=True, color=NAVY), align=WRAP, fill=FILL_P)
-                ws.row_dimensions[r].height = 15.5 * max(1, math.ceil(len(b) / 175))
+                ws.row_dimensions[r].height = 14.5 * max(1, math.ceil(len(b) / 200))
                 r += 1
                 continue
             txt = '="• ' + b[2:] if b.startswith('="') else "• " + b
             put(ws, f"B{r}", txt, font=F_N, align=WRAP)
-            approx = len(b) - b.count("XLOOKUP") * 40
-            ws.row_dimensions[r].height = 15.5 * max(1, math.ceil(approx / 175))
+            if b.startswith("="):   # rendered length = string literals + ~6 chars per formatted number
+                rendered = sum(len(m) for m in re.findall(r'"([^"]*)"', b)) + 6 * b.count("TEXT(")
+            else:
+                rendered = len(b)
+            ws.row_dimensions[r].height = 14.5 * max(1, math.ceil(rendered / 205))
             r += 1
         r += 1
     return ws
