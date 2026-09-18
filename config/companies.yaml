@@ -9,7 +9,7 @@
 # companyfacts tags drift over time (ASC 606 adoption in 2018 renamed most of them).
 
 window:
-  first_frame: CY2016
+  first_frame: CY2015   # FY2015 is the base year for FY2016 revenue growth; ratios start FY2016
   last_frame: CY2025
 
 companies:

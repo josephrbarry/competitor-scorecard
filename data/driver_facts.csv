@@ -1,0 +1,9 @@
+ticker,label,fiscal_year,period_start,period_end,value,tag,accession,filed
+KR,Proceeds from issuance of long-term debt,2024,2024-02-04,2025-02-01,10502000000,ProceedsFromIssuanceOfLongTermDebt,0001104659-26-037723,2026-03-31
+KR,Share repurchases,2024,2024-02-04,2025-02-01,4156000000,PaymentsForRepurchaseOfCommonStock,0001104659-26-037723,2026-03-31
+KR,Share repurchases,2025,2025-02-02,2026-01-31,2699000000,PaymentsForRepurchaseOfCommonStock,0001104659-26-037723,2026-03-31
+KR,Restructuring and asset impairment charges,2025,2025-02-02,2026-01-31,2684000000,RestructuringCostsAndAssetImpairmentCharges,0001104659-26-037723,2026-03-31
+KR,LIFO reserve,2025,,2026-01-31,2553000000,InventoryLIFOReserve,0001104659-26-037723,2026-03-31
+KR,LIFO reserve,2016,,2017-01-28,1291000000,InventoryLIFOReserve,0001558370-18-003055,2018-04-18
+WMT,Noncontrolling interest (in total equity),2025,,2026-01-31,6270000000,MinorityInterest,0000104169-26-000055,2026-03-13
+COST,Membership fee revenue (included in total revenue),2025,2024-09-02,2025-08-31,5323000000,RevenueFromContractWithCustomerExcludingAssessedTax [srt:ProductOrServiceAxis=us-gaap:MembershipMember],0000909832-25-000101,2025-10-08

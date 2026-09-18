@@ -17,13 +17,13 @@ def wide(ticker):
 @pytest.mark.parametrize("ticker", ["WMT", "COST", "KR"])
 def test_full_filers_have_every_core_input_every_year(ticker):
     f = FACTS[(FACTS.ticker == ticker) & FACTS.metric.isin(CORE)]
-    assert set(f.fiscal_year) == set(range(2016, 2026))
+    assert set(f.fiscal_year) == set(range(2015, 2026))
     assert (f.status == "ok").all(), f[f.status != "ok"]
 
 
 def test_whole_foods_standalone_years_only():
     f = FACTS[(FACTS.ticker == "WFM") & FACTS.metric.isin(CORE)]
-    assert set(f[f.status.isin(["ok", "derived"])].fiscal_year) == {2016, 2017}
+    assert set(f[f.status.isin(["ok", "derived"])].fiscal_year) == {2015, 2016, 2017}
     assert (f[f.fiscal_year >= 2018].status == "no 10-K period").all()
 
 
@@ -38,7 +38,7 @@ def test_accounting_identities(ticker):
 
 def test_overrides_are_flagged_not_hidden():
     o = FACTS[FACTS.status.isin(["instance", "derived"])]
-    assert len(o) == 6
+    assert len(o) == 7
     assert o.note.notna().all() and o.accession.notna().all()
 
 
@@ -51,7 +51,7 @@ def test_whole_foods_cogs_derivation_ties():
 
 def test_sams_club_segment_complete():
     s = SEGS[SEGS.ticker == "SAMS"].pivot(index="fiscal_year", columns="metric", values="value")
-    assert set(s.index) == set(range(2016, 2026))
+    assert set(s.index) == set(range(2015, 2026))
     assert s.revenue.notna().all() and s.operating_income.notna().all()
     assert s.cost_of_sales.dropna().index.min() == 2022   # ASU 2023-07 comparatives only
     # Sam's Club is a segment of Walmart: its sales must be a minority of Walmart's
