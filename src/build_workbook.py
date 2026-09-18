@@ -242,23 +242,30 @@ def build_cover(wb):
     ws = wb.active
     ws.title = "Cover"
     sheet_setup(ws, NAVY, gridlines=False, landscape=False)
-    ws.column_dimensions["A"].width = 4
-    ws.column_dimensions["B"].width = 26
-    ws.column_dimensions["C"].width = 70
-    ws.column_dimensions["D"].width = 4
+    ws.column_dimensions["A"].width = 3
+    ws.column_dimensions["B"].width = 8
+    ws.column_dimensions["C"].width = 26
+    ws.column_dimensions["D"].width = 70
+    ws.column_dimensions["E"].width = 4
     for r in range(1, 5):
-        for c in range(1, 5):
+        for c in range(1, 6):
             ws.cell(row=r, column=c).fill = FILL_H
-    put(ws, "B2", "LOGO", font=Font(name="Calibri", size=9, color="FFFFFF"), align=CENTER,
-        border=Border(left=Side(style="dashed", color="FFFFFF"), right=Side(style="dashed", color="FFFFFF"),
-                      top=Side(style="dashed", color="FFFFFF"), bottom=Side(style="dashed", color="FFFFFF")))
-    ws.row_dimensions[2].height = 30
-    put(ws, "C3", "01   —   COVER          ·          " + REPORT_TAG, font=Font(name="Aptos", size=8, bold=True, color="9DB4D8"), align=RIGHT)
-    put(ws, "B7", "Competitor Scorecard:", font=Font(name="Aptos Display", size=28, bold=True, color=NAVY))
-    put(ws, "B8", "Walmart, Costco, Kroger & Sam's Club", font=Font(name="Aptos Display", size=22, bold=True, color=TEAL))
-    put(ws, "B9", "with Whole Foods Market on a best-effort basis", font=Font(name="Aptos", size=13, italic=True, color=MID))
-    ws.merge_cells("B11:C11")
-    put(ws, "B11", "Ten-year financial comparison (FY2016–FY2025) built from SEC 10-K filings: capital structure, "
+    # monogram: white letters in a teal-ruled square; sits on the navy band
+    ws.merge_cells("B2:B3")
+    put(ws, "B2", "RB", font=Font(name="Aptos Display", size=16, bold=True, color="FFFFFF"), fill=FILL_H, align=CENTER,
+        border=Border(left=Side(style="medium", color=TEAL), right=Side(style="medium", color=TEAL),
+                      top=Side(style="medium", color=TEAL), bottom=Side(style="medium", color=TEAL)))
+    ws["B3"].border = Border(left=Side(style="medium", color=TEAL), right=Side(style="medium", color=TEAL), bottom=Side(style="medium", color=TEAL))
+    put(ws, "C2", "RYAN BARRY", font=Font(name="Aptos", size=9, bold=True, color="FFFFFF"), align=Alignment(vertical="center", indent=1))
+    put(ws, "C3", "Financial analysis · SEC filings", font=Font(name="Aptos", size=8, color="9DB4D8"), align=Alignment(vertical="top", indent=1))
+    ws.row_dimensions[2].height = 22
+    ws.row_dimensions[3].height = 22
+    put(ws, "D3", "01   —   COVER          ·          " + REPORT_TAG, font=Font(name="Aptos", size=8, bold=True, color="9DB4D8"), align=Alignment(horizontal="right", vertical="top"))
+    put(ws, "C7", "Competitor Scorecard:", font=Font(name="Aptos Display", size=28, bold=True, color=NAVY))
+    put(ws, "C8", "Walmart, Costco, Kroger & Sam's Club", font=Font(name="Aptos Display", size=22, bold=True, color=TEAL))
+    put(ws, "C9", "with Whole Foods Market on a best-effort basis", font=Font(name="Aptos", size=13, italic=True, color=MID))
+    ws.merge_cells("C11:D11")
+    put(ws, "C11", "Ten-year financial comparison (FY2016–FY2025) built from SEC 10-K filings: capital structure, "
                    "resilience through 2020–2023, and margin pressure — every ratio a live formula traceable to its XBRL fact.",
         font=Font(name="Calibri", size=11, color="404040"), align=WRAP)
     ws.row_dimensions[11].height = 48
@@ -274,12 +281,12 @@ def build_cover(wb):
     ]
     r = 13
     for k, v in rows:
-        put(ws, f"B{r}", k, font=F_B, align=Alignment(vertical="top"))
-        put(ws, f"C{r}", v, font=F_N, align=Alignment(wrap_text=True, vertical="top"))
+        put(ws, f"C{r}", k, font=F_B, align=Alignment(vertical="top"))
+        put(ws, f"D{r}", v, font=F_N, align=Alignment(wrap_text=True, vertical="top"))
         ws.row_dimensions[r].height = 15 * max(1, math.ceil(len(v) / 95))
         r += 1
-    put(ws, f"B{r + 1}", "Contents", font=F_B, border=BOTTOM)
-    put(ws, f"C{r + 1}", "", border=BOTTOM)
+    put(ws, f"C{r + 1}", "Contents", font=F_B, border=BOTTOM)
+    put(ws, f"D{r + 1}", "", border=BOTTOM)
     tabs = [
         ("Executive Summary", "Findings against the three key questions, trend shifts, data caveats"),
         ("Raw Data", "As-reported inputs by company and year, named ranges, SEC citations, debt build"),
@@ -291,13 +298,13 @@ def build_cover(wb):
     ]
     r += 2
     for t, desc in tabs:
-        c = put(ws, f"B{r}", t, font=Font(name="Calibri", size=11, color=TEAL, underline="single"))
+        c = put(ws, f"C{r}", t, font=Font(name="Calibri", size=11, color=TEAL, underline="single"))
         c.hyperlink = f"#'{t}'!A1"
-        put(ws, f"C{r}", desc, font=F_N)
+        put(ws, f"D{r}", desc, font=F_N)
         r += 1
     r += 1
-    put(ws, f"B{r}", "How to read this workbook", font=F_B, border=BOTTOM)
-    put(ws, f"C{r}", "", border=BOTTOM)
+    put(ws, f"C{r}", "How to read this workbook", font=F_B, border=BOTTOM)
+    put(ws, f"D{r}", "", border=BOTTOM)
     r += 1
     guide = [
         ("Start here", "Executive Summary – the three questions, each answered in one bold line, followed by the evidence. Five minutes."),
@@ -308,14 +315,14 @@ def build_cover(wb):
         ("End here", "Methodology & Tools – how it was built, the accounting-policy choices (ASC 606, 842, 280, LIFO) and what they do to comparability."),
     ]
     for k, v in guide:
-        put(ws, f"B{r}", k, font=Font(name="Calibri", size=10, bold=True, color=TEAL), align=Alignment(vertical="top"))
-        put(ws, f"C{r}", v, font=F_N, align=Alignment(wrap_text=True, vertical="top"))
+        put(ws, f"C{r}", k, font=Font(name="Calibri", size=10, bold=True, color=TEAL), align=Alignment(vertical="top"))
+        put(ws, f"D{r}", v, font=F_N, align=Alignment(wrap_text=True, vertical="top"))
         ws.row_dimensions[r].height = 15 * max(1, math.ceil(len(v) / 95))
         r += 1
     ws.page_setup.fitToHeight = 1
-    put(ws, f"B{r + 1}", "Personal portfolio project built from public filings only. Not an H-E-B work product; no non-public information used.",
+    put(ws, f"C{r + 1}", "Personal portfolio project built from public filings only. Not an H-E-B work product; no non-public information used.",
         font=F_NOTE)
-    ws.merge_cells(f"B{r + 1}:C{r + 1}")
+    ws.merge_cells(f"C{r + 1}:D{r + 1}")
     return ws
 
 
