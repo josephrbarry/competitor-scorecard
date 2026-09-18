@@ -140,10 +140,16 @@ def extract_company(ticker: str, cfg: dict, first_year: int, last_year: int) -> 
             tags = spec["tags"]
             if isinstance(tags, str):
                 tags = cfg.get(tags.split(":", 1)[1], [])
+            # First candidate tag with a fact wins - unless that fact is a literal zero
+            # and a later candidate has a real value. Filers tag the prior-year
+            # comparatives of newly adopted line items (ASC 842) as 0 while the same
+            # balance still sits under the old tag (Walmart FY2018 capital leases).
             found = None
             for t in tags:
-                found = pick(_facts(cf, t), start if spec["kind"] == "duration" else None, end)
-                if found:
+                hit = pick(_facts(cf, t), start if spec["kind"] == "duration" else None, end)
+                if hit and (found is None or (found["value"] == 0 and hit["value"] != 0)):
+                    found = hit
+                if found and found["value"] != 0:
                     break
             row = {"ticker": ticker, "cik": cfg["cik"], "metric": metric, "fiscal_year": y,
                    "period_start": start if spec["kind"] == "duration" else "", "period_end": end,

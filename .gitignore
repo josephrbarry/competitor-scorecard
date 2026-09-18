@@ -5,3 +5,4 @@ __pycache__/
 data/raw/
 output/~$*.xlsx
 .pytest_cache/
+output/_preview/
