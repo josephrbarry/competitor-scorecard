@@ -51,11 +51,11 @@ parsed from the instance documents directly; spot-tied to 10-K text (Costco FY20
 $222,730M and membership fees $4,224M match the MD&A sentences verbatim; Sam's Club FY2025 net
 sales $93,015M matches the segment note).
 
-### 1.2 Fiscal-year labelling
+### 1.2 Fiscal-year labeling
 
 - Every fact's SEC `frame` attribute was compared with the fiscal-year label on the sheet:
   127/127 duration facts and 408/408 instant facts agree (e.g. Walmart period ending 2026-01-31 is
-  frame CY2025 and is labelled FY2025; Costco period ending 2025-08-31 is CY2025 → FY2025).
+  frame CY2025 and is labeled FY2025; Costco period ending 2025-08-31 is CY2025 → FY2025).
 - Period-end dates per label are printed on each company block ("Fiscal year end" row).
 - Period lengths: Walmart 364/365 days every year (fixed January 31 year-end). Costco and Kroger
   show 370-day spans in FY2017 and FY2023 (53-week years) – finding #3.
@@ -105,7 +105,7 @@ shaded and carry their derivation in the notes column.
 - For all six metrics the Scorecard values equal the Ratio Calculations cells for the selected year,
   the `#n of N` ranks match an independent sort (direction-aware), and the leader/laggard cells name
   the correct companies.
-- Conditional-formatting colour scales: red→green for the five "higher is better" metrics,
+- Conditional-formatting color scales: red→green for the five "higher is better" metrics,
   **green→red for debt-to-equity and for the composite rank** (lower is better). All seven rules
   point the right way.
 - Composite rank is computed only for the three full filers (note text corrected to say so).

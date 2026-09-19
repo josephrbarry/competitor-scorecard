@@ -26,7 +26,7 @@ Summary, Scorecard, Trend – 7 pages).
 
 ![Executive Summary](docs/executive_summary_p1.png)
 
-**Scorecard** – direction-aware ranks and colour scales; type any year into B3 and it re-ranks.
+**Scorecard** – direction-aware ranks and color scales; type any year into B3 and it re-ranks.
 
 ![Scorecard](docs/scorecard.png)
 
@@ -43,7 +43,7 @@ Summary, Scorecard, Trend – 7 pages).
 | Executive Summary | Bottom line + evidence bullets per question; numbers in the prose are formulas |
 | Raw Data | As-reported inputs (blue), Total-debt build by formula, memo lines, supporting facts – one named range per block |
 | Ratio Calculations | `=IFERROR(XLOOKUP(year, Years, Company_Metric)…, "n/a")` for six ratios, with Δ FY16→25 and Δ FY19→23 columns |
-| Scorecard | Year-selectable (data-validated input) ranking with RANK.EQ, INDEX/MATCH leader/laggard, colour scales, live takeaway text, composite rank |
+| Scorecard | Year-selectable (data-validated input) ranking with RANK.EQ, INDEX/MATCH leader/laggard, color scales, live takeaway text, composite rank |
 | Trend | Six native combo charts; FY2020–FY2023 shaded via a secondary-axis column series; NA() helper block for gaps |
 | Methodology & Tools | Sources, techniques, ASC 606 / 842 / 280 / LIFO comparability, assumptions, limits |
 | Data Lineage | 647 rows: value, tag, dimension, accession, filed, restated flag, first-filed value, EDGAR link |
@@ -62,7 +62,7 @@ Summary, Scorecard, Trend – 7 pages).
   finishes the combo charts. Re-running three scripts rebuilds it from EDGAR end to end.
 - **YAML configuration** – `config/companies.yaml` (CIKs, fiscal-year rules, tag lists,
   inventory methods) and `config/debt_policy.yaml` (per-company debt build) hold every
-  judgement that is not code.
+  judgment that is not code.
 - **Verification** – 18 pytest checks: extraction coverage, accounting identities, derivation
   tie-outs, segment sanity, and workbook values tied back to an independent pandas computation.
 
@@ -72,7 +72,7 @@ Summary, Scorecard, Trend – 7 pages).
 |---|---|
 | Walmart, Costco, Kroger | All seven inputs, FY2015 (growth base) – FY2025, from standalone 10-Ks. Costco revenue is **net sales** (membership fees shown as a memo line) so its basis matches Walmart's and Sam's Club's net sales |
 | Sam's Club | Walmart reportable segment: net sales, operating income, total assets FY2015–FY2025; cost of revenue FY2022–FY2025 |
-| Whole Foods | Standalone 10-Ks FY2015–FY2017; Amazon "Physical stores" net sales FY2018–FY2025 as a labelled successor line |
+| Whole Foods | Standalone 10-Ks FY2015–FY2017; Amazon "Physical stores" net sales FY2018–FY2025 as a labeled successor line |
 
 Missing data is shown as `n/a`, never estimated. Seven values the API could not
 return were read from the filing's XBRL instance or derived from two tagged facts;
@@ -83,7 +83,7 @@ each is cited in `data/overrides.csv` and shaded yellow in the workbook.
 `docs/audit_report.md` records a full audit of the finished workbook: every core input re-verified
 against the SEC frames API (187/187) and against 30 parsed 10-K XBRL instance documents (484/493,
 the 9 differences all being restatements where the sheet correctly uses the latest-filed value);
-360/360 ratio formulas checked against their definitions; ranks, colour scales, chart ranges and
+360/360 ratio formulas checked against their definitions; ranks, color scales, chart ranges and
 Executive Summary claims tied to the data; inventory-policy statements checked against 10-K text.
 Two findings were fixed as a result (Costco revenue basis; Walmart FY2018 capital leases).
 

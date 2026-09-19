@@ -158,7 +158,7 @@ REPORT_TAG = "RETAIL PEER BENCHMARKING   ·   FY2016–FY2025   ·   SEC 10-K DA
 
 def title_band(ws, number, title, subtitle, last_col, text_col=1, subtitle_in_band=False):
     """House-style title band (rows 1-3): navy bar with eyebrow + white title, teal rule,
-    report tag on the right; subtitle in grey italics on row 3 (or inside the band)."""
+    report tag on the right; subtitle in gray italics on row 3 (or inside the band)."""
     for r in (1, 2):
         for c in range(1, last_col + 1):
             ws.cell(row=r, column=c).fill = FILL_H
@@ -276,7 +276,7 @@ def build_cover(wb):
         ("Coverage", "Walmart Inc. · Costco Wholesale Corp. · The Kroger Co. – full 10-K coverage FY2016–FY2025"),
         ("", "Sam's Club – Walmart reportable segment (ASC 280): sales, operating income, assets; cost of sales FY2022+"),
         ("", "Whole Foods Market – standalone 10-Ks FY2016–FY2017; Amazon 'Physical stores' net sales thereafter"),
-        ("Units", "USD millions unless stated; fiscal years labelled by SEC frame convention (see Methodology)"),
+        ("Units", "USD millions unless stated; fiscal years labeled by SEC frame convention (see Methodology)"),
         ("Status", "All formulas live; recalculated in Excel with zero formula errors"),
     ]
     r = 13
@@ -339,7 +339,7 @@ def build_raw(wb, D) -> dict:
     ycol = {y: L(3 + i) for i, y in enumerate(YEARS)}
 
     title_band(ws, 3, "Raw Data", "As reported in SEC 10-K filings. USD millions. Blue = hard-coded input from EDGAR XBRL (one citation per value on the "
-                                   "Data Lineage tab); black = formula; 'n/a' = not reported – flagged, never estimated. Fiscal years labelled by SEC frame "
+                                   "Data Lineage tab); black = formula; 'n/a' = not reported – flagged, never estimated. Fiscal years labeled by SEC frame "
                                    "convention (FY2025 = Walmart fiscal 2026, Kroger 2025, Costco 2025).", last_col)
     put(ws, "A4", "Line item", font=F_H, fill=FILL_H, align=Alignment(vertical="center", indent=1))
     put(ws, "B4", "XBRL tag(s) / basis", font=F_H, fill=FILL_H, align=CENTER)
@@ -503,7 +503,7 @@ def build_raw(wb, D) -> dict:
         r += 1
     r += 1
     put(ws, f"A{r}", "Legend: blue = SEC input · black bold = formula · shaded yellow = value taken from the XBRL instance document or derived from two "
-                     "tagged facts (see note) · grey band = debt-build components · 'n/a' = not reported.", font=F_NOTE)
+                     "tagged facts (see note) · gray band = debt-build components · 'n/a' = not reported.", font=F_NOTE)
     return {"ws": ws, "rowmap": rowmap, "ycol": ycol, "drivers": driver_names}
 
 
@@ -580,7 +580,7 @@ def build_ratios(wb) -> dict:
                 name(wb, f"{key}_{pre}", f"'Ratio Calculations'!$B${r}:${ycol[2025]}${r}")
             r += 1
         r += 1
-    # n/a cells in grey italic, whole block
+    # n/a cells in gray italic, whole block
     ws.conditional_formatting.add(f"B6:{dcol2}{r}", FormulaRule(formula=["ISTEXT(B6)"], font=Font(italic=True, color=MID)))
     put(ws, f"A{r}", "Sam's Club: no balance sheet or net income at segment level, so current ratio, debt-to-equity and net margin are n/a by construction. "
                      "Whole Foods: standalone data ends FY2017; the successor growth row uses Amazon's 'Physical stores' line (mostly, not only, Whole Foods).", font=F_NOTE)
@@ -594,7 +594,7 @@ def build_scorecard(wb, R) -> dict:
     widths = {"A": 34, "B": 12, "C": 12, "D": 12, "E": 12, "F": 12, "G": 12, "H": 13, "I": 13, "J": 90}
     for k, v in widths.items():
         ws.column_dimensions[k].width = v
-    title_band(ws, 5, "Scorecard", "Direction-aware ranks and colour scales (green = strongest) · change the year to re-rank", 10, subtitle_in_band=True)
+    title_band(ws, 5, "Scorecard", "Direction-aware ranks and color scales (green = strongest) · change the year to re-rank", 10, subtitle_in_band=True)
     ws.row_dimensions[3].height = 22
     put(ws, "A3", "Scorecard year (input)", font=F_B)
     put(ws, "B3", 2025, font=Font(name="Calibri", size=12, bold=True, color=INPUT_BLUE), fmt=FMT_FY, fill=PatternFill("solid", fgColor="FFF2CC"), border=BOX, align=CENTER)
@@ -893,14 +893,14 @@ def build_method(wb, counts):
         ("Named ranges", f"{counts['names']} defined names (e.g. Walmart_Revenue, Kroger_TotalDebt, GM_Costco, ScorecardYear, Years, RatioYears). "
                          "Every cross-tab formula reads as a sentence and survives row insertions."),
         ("XLOOKUP + IFERROR", "All ratio cells: =IFERROR((XLOOKUP(year,Years,Company_Revenue)-XLOOKUP(year,Years,Company_COGS))/XLOOKUP(year,Years,Company_Revenue),\"n/a\"). "
-                              "Missing data returns the text n/a rather than #DIV/0! or #VALUE!, and is styled grey-italic by conditional formatting."),
+                              "Missing data returns the text n/a rather than #DIV/0! or #VALUE!, and is styled gray-italic by conditional formatting."),
         ("Formula-built totals", "Total debt is a formula over the extracted components under a written policy (below), not a typed number; the Scorecard "
                                  "leader/laggard and takeaway text are built with INDEX/MATCH, RANK.EQ and TEXT so they re-write when the year input changes."),
-        ("Scorecard year input", "Data-validated list (FY2016–FY2025) driving XLOOKUPs on the Scorecard and the at-a-glance figures; ranks and colour scales recompute."),
-        ("Conditional formatting", "Three-colour scales per metric row (direction-aware: low debt-to-equity is green), text-detection rules for n/a, and a reversed scale on the composite rank."),
+        ("Scorecard year input", "Data-validated list (FY2016–FY2025) driving XLOOKUPs on the Scorecard and the at-a-glance figures; ranks and color scales recompute."),
+        ("Conditional formatting", "Three-color scales per metric row (direction-aware: low debt-to-equity is green), text-detection rules for n/a, and a reversed scale on the composite rank."),
         ("Native combo charts", "Each Trend chart is an Excel column+line combination: a zero-gap column series on a hidden secondary axis shades FY2020–FY2023; "
                                 "ratio lines sit on top. The helper block converts n/a to NA() so Excel draws gaps rather than zeros."),
-        ("Model conventions", "Blue font = hard-coded SEC input; black = formula; yellow shading = instance/derived value; grey band = debt components; "
+        ("Model conventions", "Blue font = hard-coded SEC input; black = formula; yellow shading = instance/derived value; gray band = debt components; "
                               "freeze panes, print titles, fit-to-width and footers on every tab; document properties set."),
         ("Verification", f"{counts['formulas']} formulas written; the workbook is recalculated in Excel via COM after the build and scanned for error values "
                          "(#REF!, #DIV/0!, #NAME?, #VALUE!) – the only #N/A values are the intentional NA() chart gaps. Extraction is covered by 12 pytest checks "
@@ -923,7 +923,7 @@ def build_method(wb, counts):
                                      "are understated relative to a FIFO basis, more so for Kroger; (b) current assets and therefore the current ratio are "
                                      "understated for LIFO filers; (c) only Kroger discloses a reserve balance – Walmart stated that LIFO approximated FIFO through "
                                      "January 2022 (FY2021) and has given only sensitivity language since; Costco discloses the annual charge but no reserve balance. Ratios are presented as reported and trends, rather than levels, "
-                                     "are emphasised in the findings."),
+                                     "are emphasized in the findings."),
         ("Equity and net income", "Total equity includes noncontrolling interests (Walmart $6.3B FY2025); net income is the amount attributable to the parent. "
                                   "Debt-to-equity on a parent-only equity basis would be marginally higher for Walmart; no other company has material NCI."),
         ("Whole Foods cost line", "'Cost of goods sold and occupancy costs' includes store rent, so its gross margin is structurally lower than a pure "
@@ -932,7 +932,7 @@ def build_method(wb, counts):
                           "year-end is fixed (no 53-week years)."),
         ("ASSUMPTIONS & LIMITS", None),
         ("Assumptions", "Latest-filed values are the best available (restatements are accepted); segment operating income is comparable to consolidated "
-                        "operating income for margin purposes; Amazon 'Physical stores' is used as a revenue proxy for Whole Foods and labelled as such."),
+                        "operating income for margin purposes; Amazon 'Physical stores' is used as a revenue proxy for Whole Foods and labeled as such."),
         ("Out of scope", "FIFO restatement of LIFO filers; adjustments for 53-week years; currency effects in Walmart International and Costco's non-U.S. "
                          "operations; pro-forma treatment of Kroger's terminated Albertsons merger."),
         ("TOOLS", None),
