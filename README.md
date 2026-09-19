@@ -1,9 +1,9 @@
-# Competitor Scorecard: Walmart, Costco, Kroger & Sam's Club
+# Retail Peer Financial Benchmarking: Walmart, Costco, Kroger & Sam's Club
 
 **A personal portfolio project by Ryan Barry.** Built from public SEC filings
 only; not an H-E-B work product and no non-public information used.
 
-**Deliverable:** [`output/Competitor_Scorecard.xlsx`](output/Competitor_Scorecard.xlsx)
+**Deliverable:** [`output/Retail_Peer_Benchmarking.xlsx`](output/Retail_Peer_Benchmarking.xlsx)
 – 8 tabs, 937 live formulas, 101 named ranges, 0 formula errors after a full
 recalculation in Excel. Every analytical number is a formula; every input
 carries its XBRL tag, accession number and filing date.
@@ -19,7 +19,7 @@ carries its XBRL tag, accession number and filing date.
 ## Preview
 
 Don't want to open Excel? The reader's copy is
-[`docs/Competitor_Scorecard_summary.pdf`](docs/Competitor_Scorecard_summary.pdf) (Cover, Executive
+[`docs/Retail_Peer_Benchmarking_summary.pdf`](docs/Retail_Peer_Benchmarking_summary.pdf) (Cover, Executive
 Summary, Scorecard, Trend – 7 pages).
 
 **Executive Summary** – one bold verdict per question, then the evidence; every number is a live formula.
@@ -101,7 +101,7 @@ copy .env.example .env
 .venv\Scripts\python -m src.pull_data
 .venv\Scripts\python -m src.pull_segments
 .venv\Scripts\python -m src.build_workbook
-.venv\Scripts\python -m src.recalc_excel output\Competitor_Scorecard.xlsx
+.venv\Scripts\python -m src.recalc_excel output\Retail_Peer_Benchmarking.xlsx
 .venv\Scripts\python -m src.export_docs      # reader PDF + README images
 .venv\Scripts\python -m pytest -q
 ```
@@ -113,6 +113,6 @@ config/    companies.yaml, debt_policy.yaml
 data/      facts_long.csv, segments_long.csv, overrides.csv, driver_facts.csv (raw/ is cached EDGAR, git-ignored)
 src/       edgar.py, pull_data.py, pull_segments.py, build_workbook.py, recalc_excel.py, export_docs.py, audit_raw.py, audit_instances.py
 tests/     test_data.py, test_workbook.py
-output/    Competitor_Scorecard.xlsx
-docs/      audit_report.md, Competitor_Scorecard_summary.pdf, page images used above
+output/    Retail_Peer_Benchmarking.xlsx
+docs/      audit_report.md, Retail_Peer_Benchmarking_summary.pdf, page images used above
 ```

@@ -5,7 +5,7 @@ from openpyxl import load_workbook
 
 from src import edgar
 
-WB = edgar.ROOT / "output" / "Competitor_Scorecard.xlsx"
+WB = edgar.ROOT / "output" / "Retail_Peer_Benchmarking.xlsx"
 pytestmark = pytest.mark.skipif(not WB.exists(), reason="workbook not built")
 
 

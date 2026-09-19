@@ -1,6 +1,6 @@
-# Audit report – Competitor_Scorecard.xlsx
+# Audit report – Retail_Peer_Benchmarking.xlsx (built as Competitor_Scorecard.xlsx at audit time)
 
-**Date:** 2026-09-18  **Scope:** every tab of `output/Competitor_Scorecard.xlsx` as built by
+**Date:** 2026-09-18  **Scope:** every tab of `output/Retail_Peer_Benchmarking.xlsx` as built by
 `src/build_workbook.py`, against the six areas requested. All checks are scripted
 (`src/audit_raw.py`, `src/audit_instances.py`, and the ad-hoc checks reproduced in this report) so
 they can be re-run after any rebuild. Findings are classified **FIXED** (changed in this revision),

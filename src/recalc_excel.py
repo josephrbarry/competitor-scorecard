@@ -7,7 +7,7 @@ open. Running this after build_workbook.py means the saved file opens with
 values already present (previewers, pandas, and the tie-out test all read
 cached values) and gives a real "zero formula errors" check.
 
-Run:  .venv\\Scripts\\python -m src.recalc_excel output/Competitor_Scorecard.xlsx
+Run:  .venv\\Scripts\\python -m src.recalc_excel output/Retail_Peer_Benchmarking.xlsx
 """
 
 from __future__ import annotations

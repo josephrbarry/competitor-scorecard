@@ -23,7 +23,7 @@ CORE = {"revenue": "Revenue", "cost_of_sales": "COGS", "net_income": "NetIncome"
 FULL = {"WMT": 104169, "COST": 909832, "KR": 56873, "WFM": 865436}
 
 # ---- workbook values (what the sheet actually shows) -------------------------------
-wb = load_workbook(edgar.ROOT / "output" / "Competitor_Scorecard.xlsx", data_only=True)
+wb = load_workbook(edgar.ROOT / "output" / "Retail_Peer_Benchmarking.xlsx", data_only=True)
 ws = wb["Raw Data"]
 years = [ws.cell(row=4, column=c).value for c in range(3, 14)]
 names = {n: wb.defined_names[n].attr_text for n in wb.defined_names}

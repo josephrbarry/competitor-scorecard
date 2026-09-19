@@ -1,5 +1,5 @@
 """
-Build output/Competitor_Scorecard.xlsx from the extracted SEC data.
+Build output/Retail_Peer_Benchmarking.xlsx from the extracted SEC data.
 
 Every number on every analytical tab is a formula. The only hard-coded values
 are on Raw Data (blue font, one SEC citation each) and the Scorecard year
@@ -19,7 +19,7 @@ input. Design rules:
     narrative update with the model.
 
 Run:  .venv\\Scripts\\python -m src.build_workbook
-Then: .venv\\Scripts\\python -m src.recalc_excel output/Competitor_Scorecard.xlsx
+Then: .venv\\Scripts\\python -m src.recalc_excel output/Retail_Peer_Benchmarking.xlsx
 """
 
 from __future__ import annotations
@@ -44,7 +44,7 @@ from openpyxl.worksheet.datavalidation import DataValidation
 
 from src import edgar
 
-OUT = edgar.ROOT / "output" / "Competitor_Scorecard.xlsx"
+OUT = edgar.ROOT / "output" / "Retail_Peer_Benchmarking.xlsx"
 TODAY = date(2026, 9, 18)
 
 # ------------------------------------------------------------------ palette
@@ -153,7 +153,7 @@ F_BAND_TITLE = Font(name="Aptos Display", size=22, bold=True, color="FFFFFF")
 F_BAND_RIGHT = Font(name="Aptos", size=8, color="9DB4D8")
 F_BAND_SUB = Font(name="Aptos", size=10, italic=True, color="D9E2F3")
 RULE = Border(bottom=Side(style="thick", color=TEAL))
-REPORT_TAG = "COMPETITOR SCORECARD   ·   FY2016–FY2025   ·   SEC 10-K DATA"
+REPORT_TAG = "RETAIL PEER BENCHMARKING   ·   FY2016–FY2025   ·   SEC 10-K DATA"
 
 
 def title_band(ws, number, title, subtitle, last_col, text_col=1, subtitle_in_band=False):
@@ -193,7 +193,7 @@ def sheet_setup(ws, tab_color, gridlines=True, landscape=True):
     ws.page_setup.fitToHeight = 0
     ws.sheet_properties.pageSetUpPr.fitToPage = True
     ws.print_options.horizontalCentered = True
-    ws.oddFooter.center.text = "Competitor Scorecard – Ryan Barry – &D"
+    ws.oddFooter.center.text = "Retail Peer Financial Benchmarking – Ryan Barry – &D"
     ws.oddFooter.right.text = "Page &P of &N"
 
 
@@ -261,7 +261,7 @@ def build_cover(wb):
     ws.row_dimensions[2].height = 22
     ws.row_dimensions[3].height = 22
     put(ws, "D2", "01   —   COVER          ·          " + REPORT_TAG, font=Font(name="Aptos", size=8, bold=True, color="9DB4D8"), align=Alignment(horizontal="right", vertical="center"))
-    put(ws, "C7", "Competitor Scorecard:", font=Font(name="Aptos Display", size=28, bold=True, color=NAVY))
+    put(ws, "C7", "Retail Peer Financial Benchmarking", font=Font(name="Aptos Display", size=28, bold=True, color=NAVY))
     put(ws, "C8", "Walmart, Costco, Kroger & Sam's Club", font=Font(name="Aptos Display", size=22, bold=True, color=TEAL))
     put(ws, "C9", "with Whole Foods Market on a best-effort basis", font=Font(name="Aptos", size=13, italic=True, color=MID))
     ws.merge_cells("C11:D11")
@@ -1024,7 +1024,7 @@ def main() -> None:
     for ws in wb.worksheets:
         if ws.title in ("Raw Data", "Ratio Calculations", "Data Lineage"):
             ws.print_title_rows = "4:4"
-    wb.properties.title = "Competitor Scorecard: Walmart, Costco, Kroger & Sam's Club"
+    wb.properties.title = "Retail Peer Financial Benchmarking: Walmart, Costco, Kroger & Sam's Club"
     wb.properties.creator = "Ryan Barry"
     wb.properties.subject = "Ten-year financial comparison from SEC 10-K filings"
     wb.properties.keywords = "SEC EDGAR, XBRL, financial ratios, competitor analysis, ASC 842, ASC 280, LIFO"
